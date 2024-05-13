@@ -28,6 +28,18 @@ public class TrxService {
 
     @Autowired StudentService studentService;
 
+    public List<Student>  filterStudent(TrxCreateRequest trxCreateRequest) throws TrxException{
+
+        List<Student> studentList = studentService.filterBy(StudentFilterType.CONTACT, Operator.EQUAL, trxCreateRequest.getStudentContact().toString());
+
+        if(studentList ==null || studentList.isEmpty() ){
+            throw  new TrxException("Student does't belong to Library");
+        }
+
+        return studentList;
+
+    }
+
 
     @Transactional(rollbackOn = {TrxException.class}) // to make the transection synchronise
     public Trx create(TrxCreateRequest trxCreateRequest) throws TrxException {
@@ -35,12 +47,15 @@ public class TrxService {
 
         //check 1 : checking for student is of the given library
         //use filter method of student Service for this
+//
+//        List<Student> studentList = studentService.filterBy(StudentFilterType.CONTACT, Operator.EQUAL, trxCreateRequest.getStudentContact().toString());
+//
+//        if(studentList.isEmpty() || studentList ==null){
+//            throw  new TrxException("Student does't belong to Library");
+//        }
 
-        List<Student> studentList = studentService.filterBy(StudentFilterType.CONTACT, Operator.EQUAL, trxCreateRequest.getStudentContact().toString());
+        List<Student> studentList = filterStudent(trxCreateRequest);
 
-        if(studentList.isEmpty() || studentList ==null){
-            throw  new TrxException("Student does't belong to Library");
-        }
 
         Student student = studentList.get(0);
 
